@@ -105,28 +105,29 @@ test "三种材料可构造" {
   assert_eq(titanium_ta1().e_mod, 105.0)
 }
 
-/// 内置材料清单（名称），便于 CLI / 文档遍历与用户选择
-pub fn material_names() -> Array[String] {
+/// 内置材料工厂登记处（单一登记源）
+/// 设计模式：工厂登记 (Factory Registry)。
+/// 新增材料只需两步：实现构造函数 + 在本数组登记一行；
+/// material_names / all_materials 均由本登记处自动派生，无需再改。
+fn material_factories() -> Array[() -> TubeMaterial] {
   [
-    steel_dc04().name,
-    aluminum_5a02().name,
-    titanium_ta1().name,
-    stainless_304().name,
-    aluminum_6061().name,
-    magnesium_az31b().name,
+    steel_dc04,
+    aluminum_5a02,
+    titanium_ta1,
+    stainless_304,
+    aluminum_6061,
+    magnesium_az31b,
   ]
 }
 
-/// 全部内置材料对象（供遍历/对比）
+/// 全部内置材料对象（供遍历/对比），由工厂登记处派生
 pub fn all_materials() -> Array[TubeMaterial] {
-  [
-    steel_dc04(),
-    aluminum_5a02(),
-    titanium_ta1(),
-    stainless_304(),
-    aluminum_6061(),
-    magnesium_az31b(),
-  ]
+  material_factories().map(fn (f : () -> TubeMaterial) { f() })
+}
+
+/// 内置材料清单（名称），便于 CLI / 文档遍历与用户选择
+pub fn material_names() -> Array[String] {
+  all_materials().map(fn (m : TubeMaterial) { m.name })
 }
 
 test "材料数量与名称齐全" {

@@ -21,6 +21,12 @@
 /// 起皱下限内压经验形状因子（无量纲，待按教材核对调整）
 pub let wrinkle_shape_factor : Double = 1.0
 
+/// 有益皱纹分类阈值（归一化进给 feed/D0，无量纲）
+/// 依据 Yuan et al.(2003) 有益皱纹范式；如需按教材或 ABAQUS 标定调整，
+/// 只改这两个具名常量即可，无需改动分类逻辑。
+pub let beneficial_feed_lower : Double = 0.05
+pub let excessive_feed_upper : Double = 1.0
+
 /// 起皱下限内压（经验估计，单位 MPa）
 /// 公式 p_wrinkle = α · σ_y · (t / D)，α = wrinkle_shape_factor
 pub fn wrinkle_pressure_lower_bound(material : TubeMaterial, t : Double, d : Double) -> Double {
@@ -50,16 +56,16 @@ pub extend WrinkleClass with @moonbitlang/core/debug.Debug::{to_repr}
 ///   有益皱纹 (Beneficial) 范式（Yuan et al., 2003）：
 ///     早期“高进给 + 相对低压”有意引入受控皱纹储存材料，后期增压熨平；
 ///     故适度至较高 feed_ratio 落入有益区间。
-///   - feed_ratio < 0.05        几乎无补料，难以形成有益皱纹、易失稳 → Harmful
-///   - 0.05 ≤ feed_ratio ≤ 1.0  适度至较高补料 → Beneficial（有益皱纹）
-///   - feed_ratio > 1.0         进给超过管径，折叠/压溃风险 → Excessive
+///   - feed_ratio < beneficial_feed_lower  几乎无补料，难以形成有益皱纹、易失稳 → Harmful
+///   - 落在两阈值之间（含端点）           适度至较高补料 → Beneficial（有益皱纹）
+///   - feed_ratio > excessive_feed_upper  进给超过管径，折叠/压溃风险 → Excessive
 ///
 /// ⚠️ 阈值与有益/有害皱纹的严格界定属于你的课题核心，请务必校准后再用于判断。
 pub fn classify_wrinkle(feed : Double, d : Double) -> WrinkleClass {
   let feed_ratio = if d > 0.0 { feed / d } else { 0.0 }
-  if feed_ratio < 0.05 {
+  if feed_ratio < beneficial_feed_lower {
     Harmful
-  } else if feed_ratio > 1.0 {
+  } else if feed_ratio > excessive_feed_upper {
     Excessive
   } else {
     Beneficial

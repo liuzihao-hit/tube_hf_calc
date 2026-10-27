@@ -11,7 +11,7 @@
 
 ```bash
 moon run cmd/main   # 用示例参数跑一遍完整演示（DC04 管 60×2，进给 40mm）
-moon test           # 运行全部单元测试（当前 30 个，全通过）
+moon test           # 运行全部单元测试（当前 39 个，全通过）
 moon build --target wasm   # 编译为 WASM，可嵌入网页免安装运行
 ```
 
@@ -19,7 +19,7 @@ moon build --target wasm   # 编译为 WASM，可嵌入网页免安装运行
 
 | 模块 | 内容 | 状态 |
 |---|---|---|
-| `materials` | 6 种常见管材常量（DC04 / 5A02 / TA1 / 304 / 6061-T4 / AZ31B），含 σ_y、n、K、E、密度 | ✅ 已部分联网查证（DC04/5A02/TA1/AZ31B 已核对；304/6061-T4 待核对） |
+| `materials` | 6 种常见管材常量（DC04 / 5A02 / TA1 / 304 / 6061-T4 / AZ31B），含 σ_y、n、K、E、密度；工厂登记处统一派生 | ✅ 已部分联网查证（DC04/5A02/TA1/AZ31B 已核对；304/6061-T4 待核对） |
 | `units` | 单位换算（MPa↔bar、mm↔inch、N↔kN） | ✅ 已实现 |
 | `geometry` | 径厚比 D/t、管体积、送料比 | ✅ 已实现 |
 | `burst` | 破裂极限内压（薄膜理论 `p_b=2tσ_y/D`，Tresca） | ✅ 已实现 |
@@ -28,7 +28,33 @@ moon build --target wasm   # 编译为 WASM，可嵌入网页免安装运行
 | `window` | 成形窗口 `[p_wrinkle, p_burst]` 与可行性 | ✅ 已实现 |
 | `loading` | 压力加载路径推荐、窗口稳健性分级 | ✅ 已实现 |
 | `safety` | 破裂/起皱安全系数、安全等级评定 | ✅ 已实现 |
-| `report` | 汇总生成可读工艺评估报告（CLI / WASM 输出） | ✅ 已实现 |
+| `assess` | **编排层**：参数对象 `ProcessInput` + 结果聚合 `ProcessAssessment`，一次性算出全部派生量 | ✅ 已实现（报告/CLI 的单一数值来源） |
+| `report` | 汇总生成可读工艺评估报告（CLI / WASM 输出），含多材料窗口对比表 | ✅ 已实现（只做呈现，数值取自 `assess`） |
+
+## 架构与设计
+
+采用**分层 + 编排**结构，物理计算与结果呈现解耦：
+
+```
+材料 / 几何 / 单位 ─→ burst ─→ window ─→ wrinkle
+                       feeding ─→ loading ─→ safety
+                                      ↓
+                                 assess（编排层）
+                                      ↓
+                        report（呈现） ─→ CLI / WASM
+```
+
+采用的设计模式：
+
+| 模式 | 落地位置 | 作用 |
+|---|---|---|
+| 参数对象 (Parameter Object) | `ProcessInput` | 聚合材料 + 几何 + 工艺参数，替代散落的 6 参数传递 |
+| 结果聚合 (Result Aggregate) | `ProcessAssessment` | 一次性承载全部派生量；新增指标只需加一个字段 |
+| 工厂登记 (Factory Registry) | `material_factories()` | 材料单一登记处，`all_materials` / `material_names` 自动派生，新增材料只改一处 |
+| 单一职责 / 关注点分离 | 各模块 | 物理模块只算一件事；`report` 只格式化；`assess` 只编排；CLI 只组装 |
+
+> 说明：MoonBit 中跨包不能直接构造 `pub struct`，故提供 `process_input(...)` 工厂函数，
+> 使外部包也能使用 `assess` 与 `format_report_of`。
 
 ## 公式来源与物理依据
 
