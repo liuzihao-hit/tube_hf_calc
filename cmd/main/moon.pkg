@@ -1,0 +1,6 @@
+// cmd/main 可执行入口包
+import {
+  "liuzihao-hit/tube_hf_calc",
+}
+
+pkgtype(kind: "executable")
