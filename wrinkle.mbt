@@ -38,6 +38,9 @@ pub enum WrinkleClass {
   None       // 无皱（内压高于起皱下限且进给受控）
 } derive(Eq, @debug.Debug)
 
+pub extend WrinkleClass with Eq::{not_equal, equal}
+pub extend WrinkleClass with @moonbitlang/core/debug.Debug::{to_repr}
+
 /// 皱纹分类：依据轴向进给比与起皱/破裂窗口判定
 ///
 /// 判据（示意性阈值，必须按《现代液压成形技术》有益皱纹章节与你的

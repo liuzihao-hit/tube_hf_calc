@@ -37,7 +37,7 @@ pub fn recommend_loading(
   let opt_feed = optimal_feed_estimate(d, db, bulge_len)
   let adq = feed_adequacy(feed_target, d, db, bulge_len)
   let note =
-    if not(w.feasible) {
+    if !w.feasible {
       "⚠️ 当前参数下起皱下限 ≥ 破裂上限，无可行窗口；多为经验系数偏高或几何不适，请核对系数/几何。"
     } else if adq < 1.0 {
       "补料偏少：建议增大轴向进给至推荐值附近，以抑制破裂、诱导有益皱纹。"
