@@ -4,3 +4,6 @@ target/
 target
 .mooncakes/
 .moonagent/
+# MoonBit 自动生成的接口文件
+*.mbti
+pkg.generated.mbti
