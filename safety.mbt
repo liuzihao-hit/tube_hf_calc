@@ -71,3 +71,14 @@ test "安全等级分级" {
   assert_eq(safety_grade(0.8), "危险(超出窗口)")
   assert_eq(safety_grade(2.0), "稳健")
 }
+
+test "安全等级边界: 临界/合格/稳健" {
+  assert_eq(safety_grade(1.0), "临界(裕度不足)")
+  assert_eq(safety_grade(1.2), "合格")
+  assert_eq(safety_grade(1.5), "稳健")
+}
+
+test "操作内压非正时安全系数返回0(防除零)" {
+  assert_eq(burst_safety_factor(steel_dc04(), 2.0, 60.0, 0.0), 0.0)
+  assert_eq(wrinkle_safety_factor(steel_dc04(), 2.0, 60.0, 0.0), 0.0)
+}

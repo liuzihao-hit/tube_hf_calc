@@ -73,3 +73,10 @@ test "单行摘要可生成" {
   let l = summary_line(aluminum_5a02(), 2.0, 60.0)
   assert_eq(l.contains("5A02"), true)
 }
+
+test "报告包含补料推荐与安全系数段落" {
+  let r = format_report(steel_dc04(), 2.0, 60.0, 21.0, 66.0, 100.0)
+  assert_eq(r.contains("推荐补料量"), true)
+  assert_eq(r.contains("最小安全系数"), true)
+  assert_eq(r.contains("壁厚减薄率"), true)
+}

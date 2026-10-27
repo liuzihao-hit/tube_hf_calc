@@ -141,3 +141,17 @@ test "所有内置材料密度为正数" {
   assert_eq(aluminum_6061().density > 0.0, true)
   assert_eq(magnesium_az31b().density > 0.0, true)
 }
+
+// 以下测试把"已联网查证"的材料常数锁定，避免后续误改
+test "DC04 强度系数 K 已联网查证(≈558)" {
+  assert_eq(steel_dc04().k_coeff, 558.0)
+}
+
+test "TA1 屈服强度与密度已联网查证(σ_y=190, ρ=4510)" {
+  assert_eq(titanium_ta1().sigma_y, 190.0)
+  assert_eq(titanium_ta1().density, 4510.0)
+}
+
+test "5A02 强度系数 K 已联网查证(≈205)" {
+  assert_eq(aluminum_5a02().k_coeff, 205.0)
+}
