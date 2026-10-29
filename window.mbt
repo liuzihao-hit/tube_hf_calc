@@ -2,7 +2,7 @@
 ///
 /// 安全内压区间 [p_wrinkle, p_burst]：
 ///   p_burst = 2·t·σ_y / D  （破裂上限，已实现，见 burst 模块）
-///   p_wrinkle = 起皱下限内压（轴向压缩失稳，TODO 待补经验式）
+///   p_wrinkle = 起皱下限内压（轴向压缩失稳，经验式 α·σ_y·(t/D)，已实现，见 wrinkle 模块）
 ///
 /// 当 p_wrinkle < p_burst 时存在可行窗口；否则工艺不可行（必起皱或必破裂）
 
